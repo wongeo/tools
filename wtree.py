@@ -1,8 +1,14 @@
 # coding=UTF-8
 import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+be = ""
+af = ""
 
-FIX_NO_NEXT = "└─"
-FIX_HAS_NEXT = "├─"
+FIX_NO_NEXT = be + "└── "
+FIX_HAS_NEXT = be + "├── "
+FIX_NONE_I = be + "│   "
+FIX_SPACE = "    "
 dict = {}
 
 
@@ -25,7 +31,7 @@ class Node:
     def get_fix(self):
         if self.father_node is not None:  # 有父节点的，需要把父节点fix拼接上
             fa_fix = self.father_node.get_fix()
-            str = fa_fix.replace("├─", "│ ").replace("└─", "  ")
+            str = fa_fix.replace(FIX_HAS_NEXT, FIX_NONE_I).replace(FIX_NO_NEXT, FIX_SPACE)
             return str + self.fix
         else:
             return ""
