@@ -66,17 +66,6 @@ def get_version2(base_versions, name, group):
     return version
 
 
-def get_base(base_path):
-    base_compilers = []
-    bases = open(base_path, "r")
-    for line in bases.readlines():
-        if line.__contains__("- com"):
-            compiler = Compiler.create(line)
-            if compiler is not None:
-                base_compilers.append(compiler)
-    return base_compilers
-
-
 def get_base2(base_path):
     base_versions = {}
     j = json.load(open(base_path, "r"))
@@ -132,7 +121,7 @@ def download(url, path):
     if os.path.exists(path):
         print "文件存在，跳过下载"
         return
-    print "开始下载:" + url
+    print "开始下载：" + url
 
     tmp = path + ".tmp"
     if os.path.exists(tmp):
