@@ -93,7 +93,7 @@ def replace(base_path, input_path):
     base_versions = get_base2(base_path)
     file = open(input_path, "r")
     total = 0
-    ucount = 0
+    update_count = 0
     lines = file.readlines()
 
     writer = open(input_path, "w")
@@ -104,7 +104,7 @@ def replace(base_path, input_path):
             total += 1
             version = get_version2(base_versions, compiler.name, compiler.group)
             if version is not None:
-                ucount += 1
+                update_count += 1
                 spaces = ""
                 for space in range(compiler.start_index):
                     spaces += " "
@@ -118,6 +118,7 @@ def replace(base_path, input_path):
         else:
             # 没有匹配成compiler的源文输出
             out(writer, line)
+    print "匹配" + str(total) + "条依赖 更新" + str(update_count) + "条依赖"
 
 
 def out(file, count):
@@ -142,14 +143,19 @@ def download(url, path):
     print "下载完成"
 
 
+def getpath(url, suffix):
+    m2 = hashlib.md5()
+    m2.update(url)
+    return m2.hexdigest() + suffix
+
+
 if __name__ == "__main__":
     uri = sys.argv[1]
     deps = sys.argv[2]
 
-    base_path = "base_versions.des"
+    base_path = getpath(uri, ".json")
     download(uri, base_path)
 
-    dir = tempfile.gettempdir()
     # 开始遍历替换版本
     replace(base_path, deps)
 
