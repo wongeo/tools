@@ -4,8 +4,10 @@ import json
 import os
 import re
 import sys
-import tempfile
 import urllib
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 
 class Compiler:
