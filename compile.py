@@ -9,6 +9,7 @@ import urllib
 
 
 class Compiler:
+    other = None
 
     def __init__(self, content, compile, group, name, version, type):
         self.str = content
@@ -17,6 +18,15 @@ class Compiler:
         self.name = name
         self.version = version
         self.type = type
+
+        if "{" in content:
+            x = content.split("{", 1)
+            if len(x) == 2:
+                self.other = "{" + x[1]
+        elif "//" in content:
+            x = content.split("//", 1)
+            if len(x) == 2:
+                self.other = "//" + x[1]
 
         self.start_index = 0
         for index in range(len(content)):
@@ -38,14 +48,6 @@ class Compiler:
                 version = res.group(4).strip()
                 type = res.group(5).strip()
                 compiler = Compiler(content, compile, group, name, version, type)
-                return compiler
-            elif content.__contains__("- com"):
-                content = content.replace(" ", "")
-                res = re.search("-(.*)\.(.*?)\.version=(.*)", content)
-                group = res.group(1).strip()
-                name = res.group(2).strip()
-                version = res.group(3).strip()
-                compiler = Compiler(content, None, group, name, version, None)
                 return compiler
         except Exception, e:
             return None
@@ -87,6 +89,7 @@ def get_base2(base_path):
 def replace(base_path, input_path):
     print "基础依赖：" + base_path
 
+    # 获得基础依赖里面的版本号字典，key是【group + name】
     base_versions = get_base2(base_path)
     file = open(input_path, "r")
     total = 0
@@ -105,19 +108,20 @@ def replace(base_path, input_path):
                 spaces = ""
                 for space in range(compiler.start_index):
                     spaces += " "
-                nline = spaces + compiler.compile + "('" + compiler.group + ":" + compiler.name + ":" + version + "@" + compiler.type + "')"
-                out(writer, nline)
+                newline = spaces + compiler.compile + "('" + compiler.group + ":" + compiler.name + ":" + version + "@" + compiler.type + "')"
+                if compiler.other is not None:
+                    newline = newline + compiler.other
+                out(writer, newline)
             else:
                 line = line.replace("\n", "")
-                line += "//未更新版本"
                 out(writer, line)
         else:
+            # 没有匹配成compiler的源文输出
             out(writer, line)
 
 
 def out(file, count):
     if "\n" in count:
-        print (count),
         file.write(count)
     else:
         file.write(count + "\n")
@@ -146,6 +150,7 @@ if __name__ == "__main__":
     download(uri, base_path)
 
     dir = tempfile.gettempdir()
+    # 开始遍历替换版本
     replace(base_path, deps)
 
     if os.path.exists(base_path):
